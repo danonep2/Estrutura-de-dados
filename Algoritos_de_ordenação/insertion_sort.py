@@ -6,10 +6,3 @@ def insertion_sort(lista):
                 i -= 1
                 continue
             break
-
-lista = [7, 1, 2, 8, 4, 9]
-insertion_sort(lista)
-print(lista)
-
-#Iago da Silva Amorim
-#Carlos Emanuel Soares de Mesquita
