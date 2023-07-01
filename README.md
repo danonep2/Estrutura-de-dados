@@ -1,2 +1,2 @@
-# Estrutura-de-dados
- Respositório para guardar códigos da faculdade 🙂
+# Estrutura de dados
+ Respositório para guardar alguns códigos da faculdade 🙂
