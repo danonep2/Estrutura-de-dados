@@ -8,7 +8,7 @@ class No:
         self.esquerda = None
     
     def __str__(self):
-        return f'{str(self.dado)} : {str(self.peso)}'
+        return str(self.dado)
 
 
 class Arvore:
@@ -51,12 +51,14 @@ class Arvore:
     def peso(self,no = None, start = True):
         if start:
             no = self.raiz
-        
+
         if no is None:
-            return
+            return  
 
-        no.peso = self.altura(no.direita, start=False) - self.altura(no.esquerda, start=False)
+        pesoDireita = self.altura(no.direita, 1, False)
+        pesoEsquerda = self.altura(no.esquerda, 1, False)
 
+        no.peso = pesoDireita - pesoEsquerda
 
         self.peso(no.esquerda, False)
         self.peso(no.direita, False)
@@ -64,10 +66,13 @@ class Arvore:
         if start:
             self.balancear()
 
-    def balancear(self, no = None, father = None, start = True, isLeft = True):
+    def balancear(self, no = None, father = None, start = True, isLeft = True, continuar = True):
         if start:
             no = self.raiz
         
+        if not continuar:
+            return
+
         if no is None:
             return
         
@@ -78,15 +83,15 @@ class Arvore:
                 self.giroDireita(no, father, isLeft)
             
             self.peso()
-            return
+            continuar = False
         
-        self.balancear(no.esquerda, no, False, True)
-        self.balancear(no.direita, no, False, False)
+        self.balancear(no.esquerda, no, False, True, continuar)
+        self.balancear(no.direita, no, False, False, continuar)
 
     def giroEsquerda(self, no, father, isLeft):
         noA = no
         noB = no.direita
-        if noB.direita is None:
+        if noB.peso == -1:
             noB.esquerda.direita = noB
             noA.direita = noB.esquerda
             noB.esquerda = None
@@ -107,7 +112,7 @@ class Arvore:
         noA = no
         noB = no.esquerda
 
-        if noB.esquerda is None:
+        if noB.peso == 1:
             noA.esquerda = noB.direita
             noA.esquerda.esquerda = noB
             noB.direita = None
@@ -123,8 +128,6 @@ class Arvore:
         else:
             father.direita = noB
 
-        
-
     def find(self, value, no = None, start = True):
         if start:
             no = self.raiz
@@ -137,9 +140,7 @@ class Arvore:
         if value > no.dado:
             return self.find(value, no.direita, False)
 
-        if value == no.dado:
-            return True        
-        return False
+        return True
     
 
     def min(self, no):
@@ -148,53 +149,54 @@ class Arvore:
         return self.min(no.esquerda)
 
     
-    def remove(self, value, no = None, father = None, isLeft = True):
-        if no is None: no = self.raiz
+    def remove(self, value, no = None, father = None, isLeft = True, start = True):
+        if start:
+            no = self.raiz
 
+        if no is None:
+            return
 
         if value < no.dado:
-            self.remove(value, no.esquerda, no, True)
-            return self.peso()
+            self.remove(value, no.esquerda, no, True, False)
+            return
         
         if value > no.dado:
-            self.remove(value, no.direita, no, False)
-            return self.peso()
+            self.remove(value, no.direita, no, False, False)
+            return
 
-        self.len -= 1
-
-        if no.esquerda is None and no.direita is None:
-            if isLeft:
+        if no.esquerda == no.direita:
+            self.len -= 1
+            if father is None:
+                self.raiz.dado = None
+            elif isLeft:
                 father.esquerda = None
-                return self.peso()
-            father.direita = None
+            else:
+                father.direita = None
+            return self.peso()
         
-        elif no.esquerda is None:
+        if no.esquerda is None:
+            self.len -= 1
             if father is None:
                 self.raiz = self.raiz.direita
-                return self.peso()
-
-            if isLeft:
+            elif isLeft:
                 father.esquerda = no.direita
-                return self.peso()
-            father.direita = no.direita
+            else:
+                father.direita = no.direita
             return self.peso()
         
-        elif no.direita is None:
+        if no.direita is None:
+            self.len -= 1
             if father is None:
                 self.raiz = self.raiz.direita
-                return self.peso()
-
-            if isLeft:
+            elif isLeft:
                 father.esquerda = no.esquerda
-                return self.peso()
-            father.direita = no.esquerda
+            else:
+                father.direita = no.esquerda
             return self.peso()
         
-        else:
-            min = self.min(no.direita)
-            no.dado = min
-            self.remove(no.dado, no.direita, no, False)
-            return self.peso()
+        min = self.min(no.direita)
+        no.dado = min
+        self.remove(no.dado, no.direita, no, False, False)
         
 
     def altura(self,no = None,h = 0, start = True):
